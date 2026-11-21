@@ -1,0 +1,18 @@
+@import "@fontsource/archivo/800.css";
+@import "@fontsource/archivo/900.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "leaflet/dist/leaflet.css";
+@tailwind base; @tailwind components; @tailwind utilities;
+* { box-sizing: border-box; }
+body { background:#FAF5E9; color:#141414; font-family:Inter,sans-serif; margin:0; }
+h1,h2,h3,.font-display { font-family:Archivo,sans-serif; }
+.leaflet-container { font-family:Inter,sans-serif; z-index:1; }
+.bus-marker { background:#B9E62E; border:2px solid #141414; border-radius:999px; padding:2px 8px; font-size:11px; font-weight:800; white-space:nowrap; box-shadow:2px 2px 0 #141414; }
+.bus-marker.stale { background:#FFD93D; }
+.bus-marker.high { background:#FF6B6B; color:#fff; }
+.stop-dot { background:#fff; border:3px solid #141414; border-radius:50%; width:14px; height:14px; }
+::-webkit-scrollbar{width:8px} ::-webkit-scrollbar-thumb{background:#141414;border-radius:99px} ::-webkit-scrollbar-track{background:#FAF5E9}
+input,select,textarea{outline:none}
+input:focus,select:focus,textarea:focus{box-shadow:3px 3px 0 #141414}

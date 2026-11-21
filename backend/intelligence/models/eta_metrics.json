@@ -1,0 +1,29 @@
+{
+  "baseline": {
+    "mae": 1.454,
+    "rmse": 1.961,
+    "n": 1260
+  },
+  "ml": {
+    "mae": 0.624,
+    "rmse": 0.786,
+    "n": 1260
+  },
+  "n_train": 5040,
+  "n_test": 1260,
+  "n_rows_total": 6300,
+  "n_dropped_no_distance": 0,
+  "split": "time-ordered: last 20% chronologically held out",
+  "model": "GradientBoostingRegressor(n_estimators=250, max_depth=3, learning_rate=0.08)",
+  "features": [
+    "distance_km",
+    "hour",
+    "day_of_week",
+    "passengers",
+    "is_peak",
+    "route__Route 1 (Demo)",
+    "route__Route 2 (Demo)"
+  ],
+  "trained_at": "2026-11-21T14:37:47.055677+00:00",
+  "data_source": "synthetic simulator history CSV: /home/hatch/workspace/smartcommute-2.0/backend/intelligence/data/history.csv (--export-history, seed 42) \u2014 SYNTHETIC DEMO DATA, not real trips"
+}

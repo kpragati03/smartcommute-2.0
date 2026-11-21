@@ -1,0 +1,15 @@
+Django==5.1.15
+djangorestframework==3.17.2
+djangorestframework-simplejwt==5.5.1
+django-cors-headers==4.9.0
+psycopg2-binary==2.9.13
+# ML intelligence (Phase 10): ETA model training/prediction
+scikit-learn==1.9.1
+pandas==3.1.1
+numpy==2.5.5
+joblib==1.6.0
+scipy==1.18.1
+# Wave-2 hardening: pass QR images + production server/static serving
+qrcode[pil]==8.2
+gunicorn==23.0.0
+whitenoise==6.8.2

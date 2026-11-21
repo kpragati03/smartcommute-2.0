@@ -1,0 +1,26 @@
+# SmartCommute 2.0 — Phase Reports
+
+Coordinator build log. Updated after every phase with: completed functionality, files, DB changes, API changes, test results, limitations, how to run, next milestone.
+
+## Phase 1 — Audit + roadmap (DONE, 21 Nov 2026)
+See AUDIT_AND_ROADMAP.md. API contract pinned in API_CONTRACT.md.
+
+## Wave 1 — COMPLETE + integration-verified by coordinator (21 Nov 2026)
+- **Backend (Phases 2+3 + most of 5/6/8/9/11 APIs)**: Django 5.1 + DRF, 7 apps, all contract models + migrations, JWT auth, org registration, tenant isolation (tested), device telemetry with hashed keys + validation, live vehicles/ETA(baseline)/journey planner, favourites/saved journeys, driver endpoints, passes/complaints/feedback/incidents, notifications, analytics (overview/routes/crowd/eta-accuracy), plans/subscription + vehicle plan-limit, Django Admin, idempotent seed_demo (2 orgs/5 users/3 routes/3 vehicles/13 stops). **Tests: 18/18 pass** (auth, isolation, telemetry, ETA, journey). Coordinator re-ran tests: OK.
+- **Frontend (Phases 4+5)**: Vite React + Tailwind neo-brutalist design system (cream/ink/lime/sun/royal, hard shadows, Archivo+Inter), landing with live radar Leaflet map (5 s polling, honest connecting state), login/register/org-registration, commuter dashboard (live map + markers + polylines, crowd badges, staleness, ETA panel, journey planner, favourites, saved journeys), basic driver + admin pages on real APIs. **Build passes** (423 kB JS / 132 kB gzip); dev server smoke 200s.
+- **Simulator (Phase 7 core)**: stdlib-only multi-bus simulator, polyline interpolation, stop dwell + passenger events, terminus reversal, dropout/breakdown/delay flags, deterministic history CSV export (2,940 rows/14 days). **Tests: 17/17 pass**; mock-run captured 45 valid posts.
+- **Integration fix by coordinator**: backend seed wrote `polyline` but simulator expected contract key `route_polyline` (+stops/capacity). Fixed seed to contract format and made simulator accept both keys. Re-verified live: simulator→backend HTTP 201s; `/live/vehicles/` returns moving positions/crowd/staleness; `/live/eta/` baseline 21.8 min to City Centre; `/journey/plan/` returns 1-transfer options.
+- Known limitations carried forward: journey planner forward-only; ETA prediction rows written per call; no telemetry throttling yet; no password reset; analytics passengers-today is snapshot-sum approximation; frontend admin/driver are basic (full consoles in wave 2); no WebSockets (polling).
+
+## Wave 2 — COMPLETE (21 Nov 2026), coordinator-verified: fresh-DB migrate + seed clean, **59/59 backend tests pass**, frontend build passes.
+- **Frontend-2**: full admin console (overview + recharts crowd/route/ETA-accuracy, fleet & devices with one-time key display, routes/stops CRUD, trips/schedules, drivers, pass approvals, complaints inbox, incidents, subscription/plans, platform-admin organisations), full driver portal (progress, start/end, delay, breakdown, passenger stepper, history), commuter depth (pass apply + QR with client-side fallback, complaints/feedback/incident forms, notifications bell with 30 s poll). Build: 912 kB JS / 269 kB gzip.
+- **Backend-2**: notification triggers (delay→commuters, breakdown→commuters+admins, incident→admins, pass→applicant, complaint→reporter, trip-start→favouriters), `GET /passes/{id}/qr/` PNG, telemetry throttling (per-device-key, 429), bidirectional journey planner, password reset (console email in dev), AuditLog writes, production settings (gunicorn/whitenoise/SECURE_*/DATABASE_URL/render.yaml/Procfile). +30 tests, live smoke verified (QR PNG magic bytes, reset flow, reverse journey, throttle 429).
+- **ML intelligence (Phase 10)**: GradientBoosting ETA model trained on 6,300 simulator-history rows (30 days, seed 42), time-ordered 80/20 split. **Held-out (n=1,260): baseline MAE 1.454 / RMSE 1.961 min; ML MAE 0.624 / RMSE 0.786 min** (synthetic data — measures fit to the generator, not real-world accuracy). `/live/eta/` returns method=ml with baseline fallback; `evaluate_etas` fills actuals; crowd prediction endpoint (insufficient-data honest null); `detect_anomalies` (stale/deviation/speed-jump/impossible-jump, deduped Incidents). +11 tests.
+
+## ⚠️ BLOCKER (21 Nov 2026) — security check on ML artifact
+A system execution-risk check flagged `backend/intelligence/models/eta_model.joblib`. Per the notice, the coordinator stopped all further code execution (no server boots, no model loading, no deployment builds) pending explicit user approval. All verification completed before the notice stands (59/59 tests, wave-1 live integration, children's live smokes). Recommended path: exclude the .joblib from any repo (it's a generated artifact), retrain at deploy time via `train_eta_model`, or approve loading it.
+
+## Remaining (not executed due to blocker)
+- Phase 13 cloud deployment: GitHub repo + Render (backend + managed Postgres, env vars per backend-2 report) + Vercel (frontend, VITE_API_URL) + production verification (auth, DB, simulator feed, map, notifications) + seed/train on production.
+- Phase 14 docs/pilot readiness: root README, deployment guide, demo walkthrough.
+- Minor: frontend bundle code-splitting; Redis cache for exact global throttling; schedule evaluate_etas/detect_anomalies; retrain ML on real LocationHistory post-pilot.
