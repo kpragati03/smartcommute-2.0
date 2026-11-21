@@ -12,6 +12,11 @@ transport departments.
 > comes from the included device simulator — no physical hardware is required,
 > and the architecture is ready for real IoT devices later.
 
+**Live demo:** https://smartcommute-2-0.vercel.app (frontend) ·
+https://smartcommute-backend.onrender.com/api/v1 (API). Demo logins are in
+the "Demo accounts" section below. The free backend sleeps when idle, so the
+first load after a pause can take ~30–60 s.
+
 ## What it does
 
 - **Commuter app** — live Leaflet map with moving buses, stop/route search,
