@@ -3,6 +3,16 @@
 Production topology: **Vercel** (React frontend) + **Render** (Django API web
 service + managed PostgreSQL). HTTPS is provided by both platforms.
 
+## Live deployment (Nov 2026)
+
+- Frontend: https://smartcommute-2-0.vercel.app
+- Backend API: https://smartcommute-backend.onrender.com/api/v1
+- Repository: https://github.com/kpragati03/smartcommute-2.0
+
+Demo logins are listed in the README. Note: Render's free web service sleeps
+when idle (first request after a pause can take ~30–60 s), and the free
+PostgreSQL plan has a limited lifetime — upgrade for a long-lived pilot.
+
 ## 1. Backend on Render (Blueprint)
 
 1. Push this repository to GitHub.
@@ -36,23 +46,19 @@ service + managed PostgreSQL). HTTPS is provided by both platforms.
 ## 3. Seed + train on production
 
 The trained ETA model (`*.joblib`) is a **generated artifact and is never
-committed**. Train it against the production database:
+committed**. Both seeding and training run **inside the Render build**
+(see `buildCommand` in `render.yaml`): every deploy runs
+`migrate` → `seed_demo` → `train_eta_model`, so the demo dataset and a
+freshly trained model are always present. (Direct database connections
+from outside Render may be blocked by some networks/proxies; the build-time
+approach avoids needing them.)
 
-```bash
-# From a machine with this repo + backend venv, pointing at production:
-export DATABASE_URL="<external connection string from Render>"
-cd backend
-.venv/bin/python manage.py migrate
-.venv/bin/python manage.py seed_demo
-.venv/bin/python manage.py train_eta_model
-```
-
-`seed_demo` also writes `simulator/config.json` with production device keys —
-keep that file out of git (it is gitignored).
+Note: `seed_demo` resets the demo dataset on each deploy. For a real pilot,
+remove `seed_demo` from the build command and seed once manually instead.
 
 ## 4. Verify production
 
-- `GET https://<backend>/api/v1/health/` (or any public endpoint) responds.
+- `GET https://smartcommute-backend.onrender.com/api/v1/` responds (401 without auth is expected).
 - Log in on the Vercel frontend with a demo account (see README).
 - Run the simulator against production (`api_base_url` in
   `simulator/config.json`) and watch buses move on the live map.
